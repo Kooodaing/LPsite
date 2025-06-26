@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LP速達便 - 最短即日でLP制作</title>
+    <meta name="description" content="バイブコーディングで最短即日・唯一無二のLPを制作">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #38B6FF;
+            --cta-color: #FF6B00;
+            --cta-hover: #FF8E3C;
+            --gradient-start: #38B6FF;
+            --gradient-end: #0EA5E9;
+            --rocket-color: #FF6B00;
+            --loading-bg: #0F172A;
+            --loading-color: #38B6FF;
+            --good-color: #4CAF50;
+            --bad-color: #F44336;
+            --medium-color: #FFC107;
+            --vibe-color: #38B6FF;
+        }
+        
+        /* Loading Screen Styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--loading-bg);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-screen.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .loading-logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--loading-color), var(--gradient-end));
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+        
+        .loading-logo::before {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle at 50% 50%, var(--loading-color) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: glow 2s infinite;
+        }
+        
+        .loading-text {
+            color: var(--loading-color);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes glow {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.5; transform: scale(0.95); }
+        }
+        
+        /* Comparison Table Icons */
+        .comparison-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .comparison-icon.good {
+            background-color: var(--good-color);
+            color: white;
+            box-shadow: 0 2px 5px rgba(76, 175, 80, 0.2);
+        }
+        
+        .comparison-icon.bad {
+            background-color: var(--bad-color);
+            color: white;
+            box-shadow: 0 2px 5px rgba(244, 67, 54, 0.2);
+        }
+        
+        .comparison-icon.medium {
+            background-color: #666;
+            color: white;
+            box-shadow: 0 2px 5px rgba(102, 102, 102, 0.2);
+        }
+        
+        .comparison-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Comparison Table Styling */
+        .comparison-table td:first-child {
+            font-weight: 500;
+        }
+        
+        .comparison-table td:nth-child(2) {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--vibe-color);
+        }
+        
+        .comparison-table td:nth-child(3),
+        .comparison-table td:nth-child(4) {
+            color: #666;
+        }
+        
+        .comparison-table td:nth-child(2) .comparison-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 1.2rem;
+        }
+        
+        /* Scroll Animation */
+        .comparison-row {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .comparison-row.animate-fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Project Icon Styles */
+        .project-icon {
+            color: #666;
+            transition: color 0.3s ease;
+        }
+        
+        .project-icon:hover {
+            color: var(--primary-color);
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(56, 182, 255, 0.1) 0%, transparent 50%);
+            animation: gradientMove 15s infinite;
+        }
+        
+        @keyframes gradientMove {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(50%); }
+            100% { transform: translateX(0); }
+        }
+        
+        .cta-button {
+            background: linear-gradient(45deg, var(--cta-color), var(--cta-hover));
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
+        }
+        
+        /* Rocket Animation */
+        .rocket {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--rocket-color);
+            border-radius: 50% 50% 0 0;
+            transform-origin: bottom;
+            animation: fly 3s ease-in-out infinite;
+        }
+        
+        .rocket::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid var(--rocket-color);
+            transform: translateX(-50%);
+        }
+        
+        @keyframes fly {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-100px) rotate(30deg);
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+        
+        /* Vibecoding Section Styles */
+        .vibecoding-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4rem;
+            padding: 4rem 0;
+        }
+        
+        .vibecoding-card {
+            width: 300px;
+            height: 300px;
+            background: white;
+            border-radius: 50% 0 50% 0;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .vibecoding-card:hover {
+            transform: translateY(-10px) rotate(-5deg);
+        }
+        
+        .vibecoding-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--gradient-end));
+        }
+        
+        .vibecoding-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            height: 50%;
+            background: linear-gradient(135deg, transparent, rgba(56, 182, 255, 0.1));
+            border-radius: 50%;
+        }
+        }
+        
+        .cta-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 0, 0.3);
+        }
+        
+        .cta-button:hover::after {
+            transform: translateX(100%);
+        }
+        
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--gradient-end));
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stats-label {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--gradient-end));
+        }
+        
+        .icon-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(56, 182, 255, 0.1);
+            border-radius: 15px;
+            font-weight: 500;
+        }
+        
+        .icon-badge i {
+            color: var(--primary-color);
+        }
+        
+        .bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.05;
+            background: url("data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 50 50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h50v50H0z' fill='%2338B6FF'/%3E%3C/svg%3E") repeat;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.2;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white">
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-rocket text-white text-2xl"></i>
+            </div>
+            <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+    <!-- Hero Section -->
+    <section class="relative h-screen flex items-center justify-center hero-gradient">
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="mb-8">
+                    <div class="relative">
+                        <i class="fas fa-rocket text-4xl text-white mb-4"></i>
+                        <div class="absolute -top-20 left-1/2 transform -translate-x-1/2">
+                            <div class="rocket"></div>
+                        </div>
+                        <h1 class="text-5xl md:text-7xl font-bold mb-6 text-white">
+                            たった 1 日で、売れる LP が届く。
+                        </h1>
+                        <p class="text-xl md:text-3xl text-white/90 mb-8">
+                            <span class="block">心を掴む没入感は、ノーコードでは生まれない。</span>
+                            <span class="block">現役ライターのバイブコーディングで紡ぐ、唯一無二の体験を。</span>
+                        </p>
+                        <div class="flex flex-col md:flex-row gap-4 justify-center">
+                            <a href="#contact" class="cta-button text-white font-semibold">
+                                最短納品を相談する
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                            <a href="#portfolio" class="inline-block bg-white/10 hover:bg-white/20 text-white font-semibold py-4 px-8 rounded-full transition duration-300">
+                                実績を見る
+                                <i class="fas fa-eye ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute top-0 left-0 w-full h-full">
+                <div class="floating-icon" style="left: 10%; top: 15%;">
+                    <i class="fas fa-star text-4xl text-white/30"></i>
+                </div>
+                <div class="floating-icon" style="left: 70%; top: 30%;">
+                    <i class="fas fa-code text-4xl text-white/30"></i>
+                </div>
+                <div class="floating-icon" style="right: 10%; top: 60%;">
+                    <i class="fas fa-clock text-4xl text-white/30"></i>
+                </div>
+                <div class="floating-icon" style="left: 20%; top: 70%;">
+                    <i class="fas fa-magic text-4xl text-white/30"></i>
+                </div>
+                <div class="floating-icon" style="right: 20%; top: 80%;">
+                    <i class="fas fa-lightbulb text-4xl text-white/30"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-20 bg-gradient-to-r from-gray-50 to-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 section-title">
+                実績と実力
+            </h2>
+            <div class="grid md:grid-cols-4 gap-8 text-center">
+                <div class="p-6 feature-card">
+                    <div class="stats-number">100+</div>
+                    <div class="stats-label">実績件数</div>
+                    <div class="mt-4">
+                        <span class="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            100%納期達成
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6 feature-card">
+                    <div class="stats-number">95%</div>
+                    <div class="stats-label">納期達成率</div>
+                    <div class="mt-4">
+                        <span class="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            24時間対応
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6 feature-card">
+                    <div class="stats-number">4.8</div>
+                    <div class="stats-label">クライアント満足度</div>
+                    <div class="mt-4">
+                        <span class="inline-block bg-purple-100 text-purple-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            95%リピート
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6 feature-card">
+                    <div class="stats-number">100%</div>
+                    <div class="stats-label">カスタマイズ対応</div>
+                    <div class="mt-4">
+                        <span class="inline-block bg-yellow-100 text-yellow-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            無制限修正
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vibecoding Section -->
+    <section class="py-20 bg-gradient-to-r from-gray-50 to-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 section-title">
+                    バイブコーディングとは？
+                </h2>
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div class="text-center mb-8">
+                        <span class="inline-block bg-primary-color text-white px-4 py-2 rounded-full mb-4">
+                            プログラミングの常識を変える革命的な方法
+                        </span>
+                        <h3 class="text-2xl font-bold mb-4">
+                            バイブコーディング（vibe coding）とは
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            難しいコードを一切書かずに、AIに普通の日本語で「こんなことをしたい」と伝えるだけで、自動的にプログラムやアプリを作ってくれる画期的な開発方法です。
+                        </p>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="relative p-6 bg-white border border-gray-100 rounded-xl">
+                            <div class="absolute -top-3 -left-3 bg-gradient-to-r from-primary-color to-gradient-end w-12 h-12 rounded-full flex items-center justify-center">
+                                <i class="fas fa-rocket text-white text-xl"></i>
+                            </div>
+                            <h4 class="text-xl font-semibold mb-4">本サービスでの活用</h4>
+                            <p class="text-gray-600">
+                                この技術を活用して、本サービスでは高いクオリティを保ったまま、24時間以内にオリジナルLPを作成します。高速納品をウリにするサービスの多くはノーコードツールを使用しており、他と似通ったLPになりがちです。差別化して商品・サービスをアピールするためのクリエイティブなデザインをお求めの方はぜひご相談ください。
+                            </p>
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="flex-1">
+                                <div class="p-6 bg-white border border-gray-100 rounded-xl">
+                                    <h4 class="text-xl font-semibold mb-4">従来のノーコードツールの課題</h4>
+                                    <ul class="space-y-3 text-gray-600">
+                                        <li>
+                                            <i class="fas fa-times text-red-500 mr-2"></i>
+                                            テンプレート依存による似通ったデザイン
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-times text-red-500 mr-2"></i>
+                                            表現やアニメーションの制限
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-times text-red-500 mr-2"></i>
+                                            ブランド差別化の難しさ
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="p-6 bg-white border border-gray-100 rounded-xl">
+                                    <h4 class="text-xl font-semibold mb-4">バイブコーディングの優位性</h4>
+                                    <ul class="space-y-3 text-gray-600">
+                                        <li>
+                                            <i class="fas fa-check text-green-500 mr-2"></i>
+                                            独自UI/UXの自由な実現
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-check text-green-500 mr-2"></i>
+                                            制限のない表現力
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-check text-green-500 mr-2"></i>
+                                            ブランドに合ったクリエイティブなデザイン
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 section-title">
+                    バイブコーディング vs 他サービス比較
+                </h2>
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full comparison-table">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        項目
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        バイブコーディング
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        格安ノーコードツール
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        コーダー＆デザイナーによるLP制作
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white">
+                                <tr class="comparison-row">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-clock project-icon"></i>
+                                            制作期間
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon good">○</span><strong>最短即日</strong>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon medium">▲</span>1週間〜
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon bad">×</span>2週間〜
+                                    </td>
+                                </tr>
+                                <tr class="comparison-row bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-paint-brush project-icon"></i>
+                                            デザイン自由度
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon good">○</span><strong>高い</strong>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon bad">×</span>低い
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon good">○</span>高い
+                                    </td>
+                                </tr>
+                                <tr class="comparison-row">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-wallet project-icon"></i>
+                                            価格感
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon good">○</span><strong>50,000円〜</strong>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon good">○</span>50,000円〜
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon bad">×</span>100,000円〜
+                                    </td>
+                                </tr>
+                                <tr class="comparison-row bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-edit project-icon"></i>
+                                            修正対応
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon good">○</span><strong>1週間以内なら無制限</strong>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon bad">×</span>有料
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        <span class="comparison-icon medium">▲</span>要相談
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="py-20 bg-gradient-to-r from-gray-50 to-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 section-title">
+                実績例
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="feature-card p-6">
+                    <div class="icon-badge">
+                        <i class="fas fa-shopping-cart"></i>
+                        ECサイトLP
+                    </div>
+                    <p class="text-gray-600 mt-4">コンバージョン率15%向上を実現したECサイトのLP制作実績。</p>
+                    <div class="mt-6">
+                        <span class="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            +15% CVR
+                        </span>
+                        <span class="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full ml-2">
+                            24時間納品
+                        </span>
+                    </div>
+                </div>
+                <div class="feature-card p-6">
+                    <div class="icon-badge">
+                        <i class="fas fa-cloud"></i>
+                        SaaSサービスLP
+                    </div>
+                    <p class="text-gray-600 mt-4">B2B SaaSサービス向けの高品質LPを24時間以内に制作。</p>
+                    <div class="mt-6">
+                        <span class="inline-block bg-purple-100 text-purple-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            カスタムデザイン
+                        </span>
+                        <span class="inline-block bg-yellow-100 text-yellow-800 text-sm font-semibold px-3 py-1 rounded-full ml-2">
+                            レスポンシブ
+                        </span>
+                    </div>
+                </div>
+                <div class="feature-card p-6">
+                    <div class="icon-badge">
+                        <i class="fas fa-calendar"></i>
+                        イベントLP
+                    </div>
+                    <p class="text-gray-600 mt-4">オンラインイベント向けの限定LPを短期間で制作。</p>
+                    <div class="mt-6">
+                        <span class="inline-block bg-pink-100 text-pink-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            イベント特化
+                        </span>
+                        <span class="inline-block bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full ml-2">
+                            期間限定
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+                料金プラン
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-center mb-4">シングルプラン</h3>
+                    <div class="text-4xl font-bold text-center mb-6">¥50,000</div>
+                    <ul class="space-y-3 text-gray-600">
+                        <li>LP 1枚</li>
+                        <li>ワイヤー提案</li>
+                        <li>バイブコーディング</li>
+                        <li>公開代行</li>
+                    </ul>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-center mb-4">スタンダードプラン</h3>
+                    <div class="text-4xl font-bold text-center mb-6">¥80,000</div>
+                    <ul class="space-y-3 text-gray-600">
+                        <li>LP 1枚 + A/Bテスト用バリエーション</li>
+                        <li>A/Bテスト設定サポート</li>
+                        <li>シングルプランのすべての機能</li>
+                    </ul>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-center mb-4">グロースプラン</h3>
+                    <div class="text-4xl font-bold text-center mb-6">¥120,000</div>
+                    <ul class="space-y-3 text-gray-600">
+                        <li>LP 2枚</li>
+                        <li>月次改善1ヶ月</li>
+                        <li>ヒートマップ分析</li>
+                        <li>改修2回まで</li>
+                        <li>スタンダードプランのすべての機能</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+                よくある質問
+            </h2>
+            <div class="space-y-6">
+                <details class="border rounded-lg p-6">
+                    <summary class="font-semibold text-lg flex items-center justify-between">
+                        修正は何回まで可能？
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <p class="mt-2 text-gray-600">納品後7日以内なら3回まで無料です。その後は有料となります。</p>
+                </details>
+                <details class="border rounded-lg p-6">
+                    <summary class="font-semibold text-lg flex items-center justify-between">
+                        CMS連携はできますか？
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <p class="mt-2 text-gray-600">はい、WordPress、microCMSなど主要CMSに埋め込み可能です。</p>
+                </details>
+                <details class="border rounded-lg p-6">
+                    <summary class="font-semibold text-lg flex items-center justify-between">
+                        写真素材がない場合は？
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <p class="mt-2 text-gray-600">無料・商用OKのストック写真提案、または撮影オプションをご用意しています。</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+                お問い合わせ
+            </h2>
+            <div class="max-w-3xl mx-auto">
+                <form class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">お名前</label>
+                        <input
+                            type="text"
+                            required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 transition-all duration-200"
+                            placeholder="例：山田太郎"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">メールアドレス</label>
+                        <input
+                            type="email"
+                            required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 transition-all duration-200"
+                            placeholder="例：example@company.com"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">希望納期</label>
+                        <input
+                            type="date"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 transition-all duration-200"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">参考URL / イメージ</label>
+                        <input
+                            type="text"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 transition-all duration-200"
+                            placeholder="参考となるURLやイメージのURLを入力"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">その他ご要望</label>
+                        <textarea
+                            rows="4"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 transition-all duration-200"
+                            placeholder="具体的な要望や要件など、お気軽にお書きください。"
+                        >
+                        </textarea>
+                    </div>
+                    <button
+                        type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-200"
+                    >
+                        送信する
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">LP速達便</h3>
+                    <p class="text-gray-400">最短即日でLPを制作する専門サービス</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">サービス</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">LP制作</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">A/Bテスト</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">改善サポート</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">サポート</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">よくある質問</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">プライバシーポリシー</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">利用規約</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">お問い合わせ</h3>
+                    <p class="text-gray-400">info@lpsokutabi.com</p>
+                    <p class="text-gray-400">03-XXXX-XXXX</p>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center">
+                <p class="text-sm text-gray-400"> 2025 LP速達便 / 運営: 株式会社○○</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+
+        // Add smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+    <script>
+        // Hide loading screen after page load
+        window.addEventListener('load', () => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.classList.add('hide');
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 300);
+        });
+    </script>
+    <script src="scroll-animations.js"></script>
+    </body>
+</html>
