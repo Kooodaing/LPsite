@@ -9,6 +9,28 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Text Shadow Effect */
+        .text-shadow {
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Glow Effect */
+        .glow-text {
+            position: relative;
+        }
+        .glow-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(56, 182, 255, 0.2), rgba(14, 165, 233, 0.2));
+            border-radius: 9999px;
+            z-index: -1;
+        }
+        
+        /* Existing styles */
         :root {
             --primary-color: #38B6FF;
             --cta-color: #FF6B00;
@@ -475,8 +497,8 @@
                 </h2>
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <div class="text-center mb-8">
-                        <span class="inline-block bg-primary-color text-white px-4 py-2 rounded-full mb-4">
-                            プログラミングの常識を変える革命的な方法
+                        <span class="inline-block bg-primary-color text-white px-4 py-2 rounded-full mb-4 glow-text">
+                            <span class="text-shadow">プログラミングの常識を変える革命的な方法</span>
                         </span>
                         <h3 class="text-2xl font-bold mb-4">
                             バイブコーディング（vibe coding）とは
